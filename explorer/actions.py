@@ -29,15 +29,14 @@ def generate_report_action(description="Generate CSV file from SQL query",):
 
 
 def _package(queries):
-    ret = {}
     is_one = len(queries) == 1
     name_root = lambda n: f"attachment; filename={n}"  # noqa
-    ret["content_type"] = (is_one and 'text/csv') or 'application/zip'
-
-    ret["filename"] = (
-        is_one and name_root('%s.csv' % queries[0].title.replace(',', ''))
-    ) or name_root("Report_%s.zip" % date.today())
-
+    ret = {
+        "content_type": 'text/csv' if is_one else 'application/zip',
+        "filename": is_one
+        and name_root(f"{queries[0].title.replace(',', '')}.csv")
+        or name_root(f"Report_{date.today()}.zip"),
+    }
     ret["data"] = (
         is_one and CSVExporter(queries[0]).get_output()
     ) or _build_zip(queries)

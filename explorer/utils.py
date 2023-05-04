@@ -19,13 +19,7 @@ def passes_blacklist(sql):
     )
 
     regex_blacklist = [
-        (
-            bl_word,
-            re.compile(
-                r'(^|\W){}($|\W)'.format(bl_word),
-                flags=re.IGNORECASE
-            )
-        )
+        (bl_word, re.compile(f'(^|\W){bl_word}($|\W)', flags=re.IGNORECASE))
         for bl_word in app_settings.EXPLORER_SQL_BLACKLIST
     ]
 

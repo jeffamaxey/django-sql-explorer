@@ -28,8 +28,7 @@ class BaseExporter:
         self.query = query
 
     def get_output(self, **kwargs):
-        value = self.get_file_output(**kwargs).getvalue()
-        return value
+        return self.get_file_output(**kwargs).getvalue()
 
     def get_file_output(self, **kwargs):
         res = self.query.execute_query_only()
@@ -62,7 +61,7 @@ class CSVExporter(BaseExporter):
         writer = csv.writer(csv_data, delimiter=delim)
         writer.writerow(res.headers)
         for row in res.data:
-            writer.writerow([s for s in row])
+            writer.writerow(list(row))
         return csv_data
 
 
@@ -73,15 +72,10 @@ class JSONExporter(BaseExporter):
     file_extension = '.json'
 
     def _get_output(self, res, **kwargs):
-        data = []
-        for row in res.data:
-            data.append(
-                dict(zip(
-                    [str(h) if h is not None else '' for h in res.headers],
-                    row
-                ))
-            )
-
+        data = [
+            dict(zip([str(h) if h is not None else '' for h in res.headers], row))
+            for row in res.data
+        ]
         json_data = json.dumps(data, cls=DjangoJSONEncoder)
         return StringIO(json_data)
 
@@ -102,28 +96,22 @@ class ExcelExporter(BaseExporter):
 
         # Write headers
         row = 0
-        col = 0
         header_style = wb.add_format({'bold': True})
-        for header in res.header_strings:
+        for col, header in enumerate(res.header_strings):
             ws.write(row, col, header, header_style)
-            col += 1
-
-        # Write data
-        row = 1
         col = 0
-        for data_row in res.data:
+        for row, data_row in enumerate(res.data, start=1):
             for data in data_row:
                 # xlsxwriter can't handle timezone-aware datetimes or
                 # UUIDs, so we help out here and just cast it to a
                 # string
-                if isinstance(data, datetime) or isinstance(data, uuid.UUID):
+                if isinstance(data, (datetime, uuid.UUID)):
                     data = str(data)
                 # JSON and Array fields
-                if isinstance(data, dict) or isinstance(data, list):
+                if isinstance(data, (dict, list)):
                     data = json.dumps(data)
                 ws.write(row, col, data)
                 col += 1
-            row += 1
             col = 0
 
         wb.close()

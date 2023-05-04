@@ -22,8 +22,11 @@ class SqlField(CharField):
 
         passes_blacklist, failing_words = query.passes_blacklist()
 
-        error = MSG_FAILED_BLACKLIST % ', '.join(
-            failing_words) if not passes_blacklist else None
+        error = (
+            None
+            if passes_blacklist
+            else MSG_FAILED_BLACKLIST % ', '.join(failing_words)
+        )
 
         if error:
             raise ValidationError(

@@ -31,8 +31,8 @@ def do_async():
 
 def _include_table(t):
     if _get_includes() is not None:
-        return any([t.startswith(p) for p in _get_includes()])
-    return not any([t.startswith(p) for p in _get_excludes()])
+        return any(t.startswith(p) for p in _get_includes())
+    return not any(t.startswith(p) for p in _get_excludes())
 
 
 def connection_schema_cache_key(connection_alias):
@@ -41,8 +41,7 @@ def connection_schema_cache_key(connection_alias):
 
 def schema_info(connection_alias):
     key = connection_schema_cache_key(connection_alias)
-    ret = cache.get(key)
-    if ret:
+    if ret := cache.get(key):
         return ret
     if do_async():
         build_schema_cache_async.delay(connection_alias)

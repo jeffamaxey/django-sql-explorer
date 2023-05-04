@@ -115,9 +115,8 @@ class Query(models.Model):
         return get_params_for_url(self)
 
     def log(self, user=None):
-        if user:
-            if user.is_anonymous:
-                user = None
+        if user and user.is_anonymous:
+            user = None
         ql = QueryLog(
             sql=self.final_sql(),
             query_id=self.id,
@@ -234,7 +233,8 @@ class QueryResult:
         transforms = dict(app_settings.EXPLORER_TRANSFORMS)
         return [
             (ix, transforms[str(h)])
-            for ix, h in enumerate(self.headers) if str(h) in transforms.keys()
+            for ix, h in enumerate(self.headers)
+            if str(h) in transforms
         ]
 
     def column(self, ix):
@@ -246,15 +246,16 @@ class QueryResult:
         self.process_columns()
         self.process_rows()
 
-        logger.info("Explorer Query Processing took %sms." % ((time() - start_time) * 1000))
+        logger.info(
+            f"Explorer Query Processing took {(time() - start_time) * 1000}ms."
+        )
 
     def process_columns(self):
         for ix in self._get_numerics():
             self.headers[ix].add_summary(self.column(ix))
 
     def process_rows(self):
-        transforms = self._get_transforms()
-        if transforms:
+        if transforms := self._get_transforms():
             for r in self.data:
                 for ix, t in transforms:
                     r[ix] = t.format(str(r[ix]))

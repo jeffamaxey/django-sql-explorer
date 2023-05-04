@@ -12,8 +12,7 @@ class EmailCsvQueryView(PermissionRequiredMixin, View):
 
     def post(self, request, query_id, *args, **kwargs):
         if request.is_ajax():
-            email = request.POST.get('email', None)
-            if email:
+            if email := request.POST.get('email', None):
                 execute_query.delay(query_id, email)
                 return JsonResponse(
                     {'message': 'message was sent successfully'}

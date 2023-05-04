@@ -22,8 +22,7 @@ class SchemaView(PermissionRequiredMixin, View):
         connection = kwargs.get('connection', '')
         if connection not in connections:
             raise Http404
-        schema = schema_info(connection)
-        if schema:
+        if schema := schema_info(connection):
             return render(
                 request,
                 'explorer/schema.html',

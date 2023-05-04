@@ -52,10 +52,7 @@ def snapshot_query(query_id):
         logger.info(f"Starting snapshot for query {query_id}...")
         q = Query.objects.get(pk=query_id)
         exporter = get_exporter_class('csv')(q)
-        k = 'query-{}/snap-{}.csv'.format(
-            q.id,
-            date.today().strftime('%Y%m%d-%H:%M:%S')
-        )
+        k = f"query-{q.id}/snap-{date.today().strftime('%Y%m%d-%H:%M:%S')}.csv"
         logger.info(f"Uploading snapshot for query {query_id} as {k}...")
         url = s3_upload(k, exporter.get_file_output())
         logger.info(

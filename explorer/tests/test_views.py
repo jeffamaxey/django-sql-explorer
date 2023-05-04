@@ -56,7 +56,7 @@ class TestQueryListView(TestCase):
 
     def test_run_count(self):
         q = SimpleQueryFactory(title='foo - bar1')
-        for i in range(0, 4):
+        for _ in range(0, 4):
             q.log()
         resp = self.client.get(reverse("explorer_index"))
         self.assertContains(resp, '<td>4</td>')
@@ -184,10 +184,7 @@ class TestQueryDetailView(TestCase):
             resp = self.client.get(
                 reverse("query_detail", kwargs={'query_id': query.id})
             )
-            self.assertRedirects(
-                resp, f'/custom/login',
-                target_status_code=404
-            )
+            self.assertRedirects(resp, '/custom/login', target_status_code=404)
 
     def test_individual_view_permission(self):
         self.client.logout()
@@ -405,9 +402,7 @@ class TestQueryPlayground(TestCase):
 
     def test_playground_renders_with_query_sql(self):
         query = SimpleQueryFactory(sql="select 1;")
-        resp = self.client.get(
-            '{}?query_id={}'.format(reverse("explorer_playground"), query.id)
-        )
+        resp = self.client.get(f'{reverse("explorer_playground")}?query_id={query.id}')
         self.assertTemplateUsed(resp, 'explorer/play.html')
         self.assertContains(resp, 'select 1;')
 
@@ -434,9 +429,7 @@ class TestQueryPlayground(TestCase):
 
     def test_query_with_no_resultset_doesnt_throw_error(self):
         query = SimpleQueryFactory(sql="")
-        resp = self.client.get(
-            '{}?query_id={}'.format(reverse("explorer_playground"), query.id)
-        )
+        resp = self.client.get(f'{reverse("explorer_playground")}?query_id={query.id}')
         self.assertTemplateUsed(resp, 'explorer/play.html')
 
     def test_admin_required(self):
@@ -448,18 +441,12 @@ class TestQueryPlayground(TestCase):
         self.client.logout()
         with self.settings(EXPLORER_NO_PERMISSION_VIEW='explorer.tests.test_views.custom_view'):
             resp = self.client.get(reverse("explorer_playground"))
-            self.assertRedirects(
-                resp,
-                f'/custom/login',
-                target_status_code=404
-            )
+            self.assertRedirects(resp, '/custom/login', target_status_code=404)
 
     def test_loads_query_from_log(self):
         querylog = QueryLogFactory()
         resp = self.client.get(
-            '{}?querylog_id={}'.format(
-                reverse("explorer_playground"), querylog.id
-            )
+            f'{reverse("explorer_playground")}?querylog_id={querylog.id}'
         )
         self.assertContains(resp, "FOUR")
 
@@ -474,10 +461,7 @@ class TestQueryPlayground(TestCase):
     def test_fullscreen(self):
         query = SimpleQueryFactory(sql="")
         resp = self.client.get(
-            '{}?query_id={}&fullscreen=1'.format(
-                reverse("explorer_playground"),
-                query.id
-            )
+            f'{reverse("explorer_playground")}?query_id={query.id}&fullscreen=1'
         )
         self.assertTemplateUsed(resp, 'explorer/fullscreen.html')
 
@@ -502,8 +486,7 @@ class TestCSVFromSQL(TestCase):
         self.assertEqual('text/csv', resp['content-type'])
         ql = QueryLog.objects.first()
         self.assertIn(
-            'filename="Playground-%s.csv"' % ql.id,
-            resp['Content-Disposition']
+            f'filename="Playground-{ql.id}.csv"', resp['Content-Disposition']
         )
 
     def test_stream_csv_from_query(self):

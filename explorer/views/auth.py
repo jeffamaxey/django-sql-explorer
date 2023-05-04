@@ -34,9 +34,11 @@ class PermissionRequiredMixin:
         return handler(request, *args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
-        if not self.has_permission(request, *args, **kwargs):
-            return self.handle_no_permission(request)
-        return super().dispatch(request, *args, **kwargs)
+        return (
+            super().dispatch(request, *args, **kwargs)
+            if self.has_permission(request, *args, **kwargs)
+            else self.handle_no_permission(request)
+        )
 
 
 class SafeLoginView(LoginView):

@@ -62,7 +62,7 @@ class TestSqlBlacklist(TestCase):
 class TestParams(TestCase):
 
     def test_swappable_params_are_built_correctly(self):
-        expected = EXPLORER_PARAM_TOKEN + 'foo' + EXPLORER_PARAM_TOKEN
+        expected = f'{EXPLORER_PARAM_TOKEN}foo{EXPLORER_PARAM_TOKEN}'
         self.assertEqual(expected, param('foo'))
 
     def test_params_get_swapped(self):
@@ -140,4 +140,4 @@ class TestConnections(TestCase):
         from explorer.app_settings import EXPLORER_DEFAULT_CONNECTION
         from django.db import connections as djcs
         self.assertTrue(EXPLORER_DEFAULT_CONNECTION in connections)
-        self.assertNotEqual(len(connections), len([c for c in djcs]))
+        self.assertNotEqual(len(connections), len(list(djcs)))
